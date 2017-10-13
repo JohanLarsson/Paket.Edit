@@ -8,29 +8,62 @@
     internal sealed class Tagger : ITagger<IOutliningRegionTag>
     {
         private readonly ITextBuffer buffer;
+        private readonly List<Group> groups = new List<Group>();
 
         public Tagger(ITextBuffer buffer)
         {
             this.buffer = buffer;
             buffer.Changed += this.OnBufferChanged;
+            this.Update();
         }
 
         public event EventHandler<SnapshotSpanEventArgs> TagsChanged;
 
         public IEnumerable<ITagSpan<IOutliningRegionTag>> GetTags(NormalizedSnapshotSpanCollection spans)
         {
-            var group = new Group("meh", 1, 5);
-            var startLine = this.buffer.CurrentSnapshot.GetLineFromLineNumber(group.StartLine);
-            var endLine = this.buffer.CurrentSnapshot.GetLineFromLineNumber(group.EndLine);
-            yield return new TagSpan<IOutliningRegionTag>(
-                new SnapshotSpan(startLine.Start, endLine.End),
-                new OutliningRegionTag(false, true, group.Name, null));
+            foreach (var group in this.groups)
+            {
+                var startLine = this.buffer.CurrentSnapshot.GetLineFromLineNumber(group.StartLine);
+                var endLine = this.buffer.CurrentSnapshot.GetLineFromLineNumber(group.EndLine);
+                yield return new TagSpan<IOutliningRegionTag>(
+                    new SnapshotSpan(startLine.Start, endLine.End),
+                    new OutliningRegionTag(false, true, group.Name, null));
+            }
         }
 
         private void OnBufferChanged(object sender, TextContentChangedEventArgs e)
         {
+            this.Update();
             this.TagsChanged?.Invoke(this, new SnapshotSpanEventArgs(new SnapshotSpan(this.buffer.CurrentSnapshot, 0, this.buffer.CurrentSnapshot.Length)));
         }
 
+        private void Update()
+        {
+            var ln = 0;
+            this.groups.Clear();
+            var start = 0;
+            var name = string.Empty;
+            foreach (var line in this.buffer.CurrentSnapshot.Lines)
+            {
+                var text = line.GetText();
+                if (text.StartsWith("GROUP "))
+                {
+                    if (ln > start)
+                    {
+                        this.groups.Add(new Group(name, start, ln - 1));
+                    }
+
+                    start = ln;
+                    name = text;
+                }
+
+                ln++;
+            }
+
+            if (start > 0)
+            {
+                this.groups.Add(new Group(name, start, ln - 1));
+            }
+        }
     }
 }

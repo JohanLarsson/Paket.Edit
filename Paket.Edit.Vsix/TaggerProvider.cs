@@ -1,7 +1,6 @@
 ﻿namespace Paket.Edit.Vsix
 {
     using System.ComponentModel.Composition;
-    using System.Diagnostics;
     using Microsoft.VisualStudio.Text;
     using Microsoft.VisualStudio.Text.Editor;
     using Microsoft.VisualStudio.Text.Tagging;

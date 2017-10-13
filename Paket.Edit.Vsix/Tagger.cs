@@ -19,7 +19,7 @@
 
         public IEnumerable<ITagSpan<IOutliningRegionTag>> GetTags(NormalizedSnapshotSpanCollection spans)
         {
-            var group = new Group("meh", 1, 10);
+            var group = new Group("meh", 1, 5);
             var startLine = this.buffer.CurrentSnapshot.GetLineFromLineNumber(group.StartLine);
             var endLine = this.buffer.CurrentSnapshot.GetLineFromLineNumber(group.EndLine);
             yield return new TagSpan<IOutliningRegionTag>(

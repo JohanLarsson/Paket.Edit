@@ -42,7 +42,7 @@
             var ln = 0;
             this.groups.Clear();
             var start = 0;
-            var name = string.Empty;
+            string name = null;
             foreach (var line in this.buffer.CurrentSnapshot.Lines)
             {
                 var text = line.GetText();
@@ -50,7 +50,7 @@
                 {
                     if (ln > start)
                     {
-                        this.groups.Add(new Group(name, start, ln - 1));
+                        this.groups.Add(new Group(name ?? "Main", start, ln - 1));
                     }
 
                     start = ln;
